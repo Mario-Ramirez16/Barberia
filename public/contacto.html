@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contacto - Barberia Risor</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="caja">
+            <h1><img src="imagenes/logo.png" alt="Logo de la Barberia"></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="productos.html">Productos</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="contenedor-formulario">
+        <h1 class="titulo-formulario">Agenda tu cita</h1>
+        <form id="formCita" action="agendar-cita" method="POST">
+            <div class="seccion-fecha">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+            <div class="seccion-hora">
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" name="hora" required>
+            </div>
+            <div class="seccion-datos">
+                <label for="nombre">Nombre completo:</label>
+                <input type="text" id="nombre" name="nombre" required>
+                <label for="telefono">Número de teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="seccion-servicio">
+                <label for="servicio">¿Qué servicio requieres?</label>
+                <select id="servicio" name="servicio" required>
+                    <option value="">Seleccione un servicio</option>
+                    <option value="corte_cabello">Corte de cabello</option>
+                    <option value="afeitado">Afeitado</option>
+                    <option value="barba">Cuidado de barba</option>
+                </select>
+            </div>
+            <button type="submit">Enviar</button>
+            <button type="button" onclick="resetForm()">Cancelar</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <p> 💈★★★  Horario de atención de Lunes a Sábado de 9:00 a 19:00 hrs. ★★★💈 </p>
+        </div>
+    </div>
+    <footer>
+        <img src="imagenes/logo-blanco.png" alt="logo de la Barberia">
+        <p class="copyright">&copy Copyright Barberia Frisor - 2024</p>
+    </footer>
+    <script>
+        document.getElementById('formCita').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            axios.post('/agendar-cita', new URLSearchParams(formData))
+                .then(function(response) {
+                    alert('Cita agendada con éxito');
+                    document.getElementById('formCita').reset();
+                })
+                .catch(function(error) {
+                    console.error('Error al agendar la cita:', error);
+                    alert('Error al agendar la cita');
+                });
+        });
+
+        function resetForm() {
+            document.getElementById('formCita').reset();
+        }
+    </script>
+</body>
+</html>
