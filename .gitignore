@@ -1,0 +1,4 @@
+# Esto es un comentario 
+node_modules/ 
+.env 
+*.log 
