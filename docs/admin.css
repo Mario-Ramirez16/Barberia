@@ -1,67 +1,296 @@
 /* Estilos generales */
 body {
     font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
 header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: #333;
+    padding: 10px;
     color: white;
-    padding: 20px 0;
 }
 
-header h1 {
+.header-left {
+    flex: 1;
+    text-align: center; /* Centra el texto horizontalmente */
+}
+
+.header-right {
+    flex: 0;
+}
+
+h1 {
     margin: 0;
-    padding: 0;
-    font-size: 24px;
-}
-
-#logout-btn {
-    background-color: red;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-}
-
-aside {
-    background-color: #f4f4f4;
-    width: 250px;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    overflow-y: auto;
-    border-right: 1px solid #ccc;
-}
-
-nav ul {
-    list-style: none;
-    padding: 0;
-}
-
-nav ul li {
-    padding: 10px 0;
-}
-
-nav ul li a {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-}
-
-nav ul li a:hover {
-    color: #666;
 }
 
 main {
-    margin-left: 250px;
-    padding-top: 80px; /* Para dejar espacio para el header */
+    margin: 2em auto;
+    padding: 1em;
+    background-color: #fff;
+    max-width: 1400px; /* Incrementar el ancho máximo del contenedor principal */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    text-align: center; /* Centra el contenido de la tabla */
+}
+
+thead th {
+    background-color: #f2f2f2;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+th, td {
+    padding: 0.75em;
+    text-align: center; /* Centra el contenido de las celdas */
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+form {
+    display: inline;
+}
+
+input[type="text"] {
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #70c9f6;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    margin: 0.2em 0;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+footer {
+    text-align: center;
+    padding: 1em 0;
+    background-color: #333;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+/* Estilos personalizados para los campos y botones de búsqueda */
+.search-section {
+    text-align: right;
+    padding: 10px;
+}
+
+.search-section form {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.search-section input[type="text"],
+.search-section input[type="date"],
+.search-section select {
+    width: 200px; /* Ajusta el ancho aquí según sea necesario */
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+
+.search-section button {
+    background-color: rgb(100, 122, 134);
+    border: none;
+    padding: 07px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.search-section button:hover {
+    background-color: green;
+    color: white;
+}
+
+/* Asegurar tamaño consistente para inputs de valor pagado y estado */
+input[name="valor_pagado"],
+select[name="estado"] {
+    width: 100px; /* Ajusta el tamaño según sea necesario */
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+
+/* Ajustar el ancho de las columnas para mejorar la visualización */
+th:nth-child(1), td:nth-child(1) {
+    width: 15%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(2), td:nth-child(2) {
+    width: 10%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(3), td:nth-child(3) {
+    width: 15%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 15%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(5), td:nth-child(5) {
+    width: 20%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(6), td:nth-child(6) {
+    width: 10%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(7), td:nth-child(7) {
+    width: 15%; /* Ajustar según sea necesario */
+}
+
+th:nth-child(8), td:nth-child(8) {
+    width: 15%; /* Ajustar según sea necesario */
+}
+
+/*cerrar sesion*/
+.header-left {
+    float: left;
+}
+
+.header-right {
+    float: right;
+}
+
+.logout-button {
+    display: inline-block;
+    padding: 10px 10px;
+    background-color: #ff4d4d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 10px;
+    font-size: 12px; /* Puedes ajustar el tamaño de la fuente si es necesario */
+    width: 80px; /* Establece un ancho fijo */
+    height: 20px; /* Establece una altura fija */
+    text-align: center; /* Centra el texto dentro del botón */
+    line-height: 20px; /* Ajusta la línea de altura para centrar verticalmente el texto */
+}
+
+.logout-button:hover {
+    background-color: #ff1a1a;
+}
+
+header::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/*diseño vista de usuario*/
+.user-info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.user-info a {
+    color: #e7e1e1;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.user-info a:hover {
+    text-decoration: underline;
+}
+
+#profile-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+#profile-form label {
+    margin-top: 10px;
+}
+
+#profile-form input {
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+#profile-form button, #back-to-admin {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#back-to-admin {
+    background-color: #6c757d;
+}
+
+#change-password {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#password-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+#password-form input {
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+#password-form button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#cancel-password-change {
+    background-color: #dc3545;
+}
+
+input[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
 }

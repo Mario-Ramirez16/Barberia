@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="register.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <img src="imagenes/logo.png" alt="Logo" class="logo">
+    <div class="wrapper">
+        <h2>Regístrate</h2>
+        <form id="register-form">
+            <div class="input-field">
+                <input type="text" id="username" placeholder="Nombre de usuario" required>
+                <i class='bx bxs-user'></i>
+            </div>
+            <div class="input-field">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <i class='bx bxs-envelope'></i>
+            </div>
+            <div class="input-field">
+                <input type="tel" id="phone" placeholder="Teléfono" required>
+                <i class='bx bxs-phone'></i>
+            </div>
+            <div class="input-field">
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+            <button type="submit" class="register">Registrarse</button>
+            <p>¿Ya tienes una cuenta? <a href="login.html" class="sign-in">Inicia sesión</a></p>
+        </form>
+    </div>
+    <script type="module" src="/register.js"></script>
+    <footer>
+        <p>&copy; Barberia Frisor - 2024</p>
+    </footer>
+</body>
+</html>

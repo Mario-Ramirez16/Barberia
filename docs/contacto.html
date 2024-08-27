@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Contacto - Barberia Risor</title>
+    <title>Contacto - Barberia Frisor</title>
     <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -26,11 +26,24 @@
             <div class="seccion-fecha">
                 <label for="fecha">Fecha:</label>
                 <input type="date" id="fecha" name="fecha" required>
-            </div>
-            <div class="seccion-hora">
-                <label for="hora">Hora:</label>
-                <input type="time" id="hora" name="hora" required>
-            </div>
+                <div class="seccion-hora">
+                    <label for="hora">Hora:</label>
+                    <select id="hora" name="hora" required>
+                        <option value="">Seleccione una hora</option>
+                        <optgroup label="Mañana">
+                            <option value="08:00">08:00</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                        </optgroup>
+                        <optgroup label="Tarde">
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                        </optgroup>
+                    </select>
+                </div>
             <div class="seccion-datos">
                 <label for="nombre">Nombre completo:</label>
                 <input type="text" id="nombre" name="nombre" required>
@@ -44,8 +57,14 @@
                 <select id="servicio" name="servicio" required>
                     <option value="">Seleccione un servicio</option>
                     <option value="corte_cabello">Corte de cabello</option>
-                    <option value="afeitado">Afeitado</option>
-                    <option value="barba">Cuidado de barba</option>
+                    <option value="afeitado">Corte y Diseño de Barba</option>
+                    <option value="barba">Corte de Cabello + Barba</option>
+                </select>
+            </div>
+            <div class="seccion-barbero">
+                <label for="barbero">Seleccione un barbero:</label>
+                <select id="barbero" name="barbero_id" required>
+                    <option value="">Seleccione un barbero</option>
                 </select>
             </div>
             <button type="submit">Enviar</button>
@@ -62,23 +81,84 @@
         <p class="copyright">&copy Copyright Barberia Frisor - 2024</p>
     </footer>
     <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await axios.get('/barberos');
+                const barberos = response.data;
+                const barberoSelect = document.getElementById('barbero');
+                barberos.forEach(barbero => {
+                    const option = document.createElement('option');
+                    option.value = barbero.id;
+                    option.textContent = barbero.nombre;
+                    barberoSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar los barberos:', error);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fechaInput = document.getElementById('fecha');
+            const horaSelect = document.getElementById('hora');
+            const today = new Date().toISOString().split('T')[0];
+
+            // Deshabilitar el campo de hora inicialmente
+            horaSelect.disabled = true;
+
+            fechaInput.setAttribute('min', today);
+
+            fechaInput.addEventListener('change', () => {
+                const selectedDate = fechaInput.value;
+                const currentTime = new Date();
+
+                // Habilitar el campo de hora cuando se selecciona una fecha válida
+                if (selectedDate) {
+                    horaSelect.disabled = false;
+                } else {
+                    horaSelect.disabled = true;
+                }
+
+                horaSelect.querySelectorAll('option').forEach(option => {
+                    option.disabled = false;
+                });
+
+                if (selectedDate === today) {
+                    horaSelect.querySelectorAll('option').forEach(option => {
+                        const [hour, minute] = option.value.split(':');
+                        const optionTime = new Date();
+                        optionTime.setHours(hour, minute, 0, 0);
+
+                        if (optionTime < currentTime) {
+                            option.disabled = true;
+                        }
+                    });
+                }
+            });
+        });
+
+        
         document.getElementById('formCita').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
-            axios.post('/agendar-cita', new URLSearchParams(formData))
-                .then(function(response) {
-                    alert('Cita agendada con éxito');
-                    document.getElementById('formCita').reset();
-                })
-                .catch(function(error) {
-                    console.error('Error al agendar la cita:', error);
-                    alert('Error al agendar la cita');
-                });
+            const data = Object.fromEntries(formData);
+            axios.post('/agendar-cita', JSON.stringify(data), {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                alert('Cita agendada con éxito');
+                document.getElementById('formCita').reset();
+            })
+            .catch(function(error) {
+                console.error('Error al agendar la cita:', error);
+                alert('Error al agendar la cita');
+            });
         });
-
+        
         function resetForm() {
             document.getElementById('formCita').reset();
         }
-    </script>
+        </script>        
 </body>
 </html>

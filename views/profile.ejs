@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de Usuario</title>
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+    <header>
+        <h1>Perfil de Usuario</h1>
+        <a href="/admin/profile" class="back-button">Volver a Administración</a>
+    </header>
+    <div class="user-info">
+        <a href="/admin/profile" id="user-name"><%= user.usuario %></a>
+    </div>
+    <main>
+        <form id="profile-form">
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario" name="usuario" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" name="telefono">
+            
+            <button type="submit">Actualizar Perfil</button>
+        </form>
+    </main>
+        
+</body>
+    
+<script>
+    document.querySelector('.back-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch('/admin', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/admin';
+            } else {
+                console.error('Error al acceder a /admin:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+        });
+    } else {
+        console.error('No se encontró token de autenticación');
+    }
+});
+</script>
+</html>

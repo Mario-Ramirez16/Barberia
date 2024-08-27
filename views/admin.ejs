@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración de Citas - Barbería</title>
+    <link rel="stylesheet" href="/admin.css">
+    <script src="/utils.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1>Administración de Citas</h1>
+        </div>
+        <div class="header-right">
+            <a href="/logout" class="logout-button">Cerrar Sesión</a>
+        </div>
+    </header>
+    <div class="user-info">
+        <a href="/admin/profile" id="user-name"></a>
+    </div>
+    <div class="search-section">
+        <form class="search-form" action="/admin/search" method="GET">
+            <input type="text" name="nombre" placeholder="Buscar por nombre">
+            <select name="estado">
+                <option value="">Todos los estados</option>
+                <option value="Agendada">Agendada</option>
+                <option value="Cancelada">Cancelada</option>
+                <option value="Pendiente">Pendiente</option>
+            </select>
+            <input type="date" name="fecha_inicio">
+            <input type="date" name="fecha_fin">
+            <button type="submit">Buscar</button>
+        </form>
+        <form class="show-all-form" action="/admin" method="GET">
+            <button type="submit">Mostrar todas</button>
+        </form>
+    </div>
+    <main>
+        <% if (success_msg) { %>
+            <div class="alert alert-success"><%= success_msg %></div>
+        <% } %>
+        <% if (error_msg) { %>
+            <div class="alert alert-danger"><%= error_msg %></div>
+        <% } %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Servicio</th>
+                    <th>Barbero</th>
+                    <th>Valor Pagado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% citas.forEach(cita => { %>
+                    <tr>
+                        <td><%= cita.fecha %></td>
+                        <td><%= cita.hora %></td>
+                        <td><%= cita.nombre_completo %></td>
+                        <td><%= cita.telefono %></td>
+                        <td><%= cita.email %></td>
+                        <td><%= cita.servicio_requerido %></td>
+                        <td><%= cita.nombre_barbero %></td>
+                        <td>
+                            <form action="/admin/update/<%= cita.cita_id %>" method="POST">
+                                <input type="number" name="valor_pagado" value="<%= cita.valor_pagado %>">
+                                <button type="submit">Actualizar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/admin/updateEstado/<%= cita.cita_id %>" method="POST">
+                                <input type="hidden" name="cita_id" value="<%= cita.cita_id %>">
+                                <select name="estado">
+                                    <option value="Agendada" <%= cita.estado === 'Agendada' ? 'selected' : '' %>>Agendada</option>
+                                    <option value="Cancelada" <%= cita.estado === 'Cancelada' ? 'selected' : '' %>>Cancelada</option>
+                                    <option value="Pendiente" <%= cita.estado === 'Pendiente' ? 'selected' : '' %>>Pendiente</option>
+                                </select>
+                                <button type="submit">Actualizar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/admin/delete/<%= cita.cita_id %>" method="POST">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </main>
+    <footer>
+        <p>&copy; Barberia Frisor - 2024</p>
+    </footer>
+</body>
+<script>
+
+    function getToken() {
+    const token = localStorage.getItem('token');
+    console.log('Token obtenido:', token ? 'Token existe' : 'Token no encontrado');
+    return token;
+}
+
+let pageReloaded = false;
+
+function reloadPageWithAuth() {
+    if (pageReloaded) return;
+
+    const token = getToken();
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (token && !urlParams.has('token')) {
+        pageReloaded = true; // Marca como recargado
+        window.location.href = `${window.location.pathname}?token=${token}`;
+    } else if (!token) {
+        window.location.href = '/login.html';
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', function() {
+    getUserInfo();
+});
+
+function getUserInfo() {
+        const token = getToken();
+        if (!token) {
+            console.error('No se encontró token de autenticación');
+            return;
+        }
+
+        console.log('Token recibido:', token);
+
+        fetchWithAuth('/admin/user-info', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(data => {
+                console.log('User info received:', data);
+                if (data.success) {
+                    const userNameElement = document.getElementById('user-name')
+                    if (userNameElement) {
+                        userNameElement.textContent = data.usuario;
+                    } else {
+                        console.error('Elemento user-name no encontrado en el DOM');
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching user info:', error));
+    }
+
+    document.getElementById('user-name').addEventListener('click', function(e) {
+    e.preventDefault();
+    const token = getToken();
+
+    if (isTokenExpired(token)) {
+        console.log('Token expirado, redirigiendo al login');
+        window.location.href = '/login.html';
+    } else {
+        fetchWithAuth('/admin/profile', { method: 'GET' })
+            .then(data => {
+                if (data.success) {
+                    renderProfile(data.user);
+                } else {
+                    console.error('Error:', data.message);
+                    alert('Error al acceder al perfil: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error completo:', error);
+                if (error.response) {
+                    console.error('Respuesta del servidor:', error.response);
+                }
+                if (error.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = '/login.html';
+                } else {
+                    alert('Error al acceder al perfil. Por favor, intente nuevamente.');
+                }
+            });
+    }
+});
+
+
+//Actualizacion en perfil
+
+function renderProfile(user) {
+    const profileDiv = document.createElement('div');
+    profileDiv.innerHTML = `
+        <h2>Perfil de Usuario</h2>
+        <form id="profile-form">
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario" name="usuario" value="${user.usuario}" readonly>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="${user.email}" required>
+            
+            <label for="telefono">Teléfono:</label>
+            <input type="tel" id="telefono" name="telefono" value="${user.telefono}">
+            
+            <button type="submit">Actualizar Perfil</button>
+        </form>
+        <button id="change-password">Cambiar Contraseña</button>
+        <button id="back-to-admin">Volver a Administración</button>
+    `;
+    
+    document.querySelector('main').innerHTML = '';
+    document.querySelector('main').appendChild(profileDiv);
+
+    // Agregar event listeners para los elementos
+    document.getElementById('profile-form').addEventListener('submit', updateProfile);
+    document.getElementById('change-password').addEventListener('click', showChangePasswordForm);
+    document.getElementById('back-to-admin').addEventListener('click', backToAdmin);
+}
+
+function backToAdmin() {
+    const token = localStorage.getItem('token');
+    if (token) {
+        window.location.href = `/admin?token=${token}`;
+    } else {
+        console.error('No se encontró token');
+        window.location.href = '/login.html';
+    }
+}
+function updateProfile(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const userData = Object.fromEntries(formData.entries());
+
+    fetchWithAuth('/admin/update-profile', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Perfil actualizado exitosamente');
+            renderProfile(userData);
+        } else {
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar el perfil: ' + error.message);
+    });
+}
+
+function showChangePasswordForm() {
+    const passwordFormDiv = document.createElement('div');
+    passwordFormDiv.innerHTML = `
+        <h3>Cambiar Contraseña</h3>
+        <form id="password-form">
+            <label for="old-password">Contraseña Actual:</label>
+            <input type="password" id="old-password" name="oldPassword" required>
+            
+            <label for="new-password">Nueva Contraseña:</label>
+            <input type="password" id="new-password" name="newPassword" required>
+            
+            <label for="confirm-password">Confirmar Nueva Contraseña:</label>
+            <input type="password" id="confirm-password" name="confirmPassword" required>
+            
+            <button type="submit">Cambiar Contraseña</button>
+            <button type="button" id="cancel-password-change">Cancelar</button>
+        </form>
+    `;
+    
+    document.querySelector('main').appendChild(passwordFormDiv);
+    
+    document.getElementById('password-form').addEventListener('submit', changePassword);
+    document.getElementById('cancel-password-change').addEventListener('click', () => passwordFormDiv.remove());
+}
+
+function changePassword(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const passwordData = Object.fromEntries(formData.entries());
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+        alert('Las nuevas contraseñas no coinciden');
+        return;
+    }
+
+    fetchWithAuth('/admin/change-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passwordData)
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Contraseña actualizada exitosamente');
+            e.target.remove(); // Elimina el formulario de cambio de contraseña
+        } else {
+            alert('Error al cambiar la contraseña: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar la contraseña');
+    });
+}
+//Actualizacion en administracion
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Enviando solicitud a:', this.action);
+            const formData = new FormData(this);
+            
+            let fetchOptions = {
+                method: this.method,
+                body: JSON.stringify(Object.fromEntries(formData))
+            };
+
+            let url = this.action;
+            
+            // Manejo especial para la búsqueda y mostrar todas
+            if (this.classList.contains('search-form')) {
+                const searchParams = new URLSearchParams(formData);
+                url = `/admin/search?${searchParams.toString()}`;
+                fetchOptions.method = 'GET';
+                delete fetchOptions.body;
+            } else if (this.classList.contains('show-all-form')) {
+                url = '/admin';
+                fetchOptions.method = 'GET';
+                delete fetchOptions.body;
+            }
+
+            fetchWithAuth(url, fetchOptions)
+            .then(data => {
+                console.log('Respuesta recibida:', data);
+                console.log('Tipo de dato:', typeof data);
+                if (data.success) {
+                    if (this.classList.contains('search-form') || this.classList.contains('show-all-form')) {
+                        updateTable(data.citas);
+                    } else {
+                        console.error('Respuesta inesperada:', data);
+                        alert(data.message);
+                        const row = this.closest('tr');
+                        if (this.action.includes('/admin/update/')) {
+                            row.querySelector('input[name="valor_pagado"]').value = data.updatedData.valor_pagado;
+                        } else if (this.action.includes('/updateEstado/')) {
+                            row.querySelector('select[name="estado"]').value = data.updatedData.estado;
+                        } else if (this.action.includes('/delete/')) {
+                            row.remove(); // Elimina la fila de la tabla
+                        }
+                    }
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud: ' + error.message);
+            });
+        });
+    });
+
+    function updateTable(citas) {
+    if (!Array.isArray(citas) || citas.length === 0) {
+        console.error('No se encontraron citas o el formato es incorrecto.');
+        return;
+    }
+
+    const tbody = document.querySelector('table tbody');
+    if (!tbody) {
+        console.error('Elemento tbody no encontrado');
+        return;
+    }
+
+    tbody.innerHTML = ''; // Limpiar tabla actual
+
+    citas.forEach(cita => {
+        const row = createTableRow(cita);
+        tbody.appendChild(row);
+    });
+
+    console.log('Tabla actualizada con éxito');
+    addFormEventListeners(); // Agregar event listeners a los nuevos formularios
+}
+
+function addFormEventListeners() {
+    const forms = document.querySelectorAll('form');
+    
+    // Elimina event listeners previos antes de agregar nuevos
+    forms.forEach(form => {
+        form.removeEventListener('submit', handleFormSubmit);
+        form.addEventListener('submit', handleFormSubmit);
+    });
+}
+function handleFormSubmit(e) {
+    e.preventDefault();
+    console.log('Enviando solicitud a:', this.action);
+    const formData = new FormData(this);
+    
+    let fetchOptions = {
+        method: this.method,
+        body: JSON.stringify(Object.fromEntries(formData))
+    };
+
+    fetchWithAuth(this.action, fetchOptions)
+    .then(data => {
+        console.log('Respuesta recibida:', data);
+        if (data.success) {
+            alert(data.message);
+            const row = this.closest('tr');
+            if (this.action.includes('/admin/update/')) {
+                row.querySelector('input[name="valor_pagado"]').value = data.updatedData.valor_pagado;
+            } else if (this.action.includes('/updateEstado/')) {
+                row.querySelector('select[name="estado"]').value = data.updatedData.estado;
+            } else if (this.action.includes('/delete/')) {
+                row.remove(); // Elimina la fila de la tabla
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud: ' + error.message);
+    });
+}
+        function createTableRow(cita) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${cita.fecha}</td>
+                <td>${cita.hora}</td>
+                <td>${cita.nombre_completo}</td>
+                <td>${cita.telefono}</td>
+                <td>${cita.email}</td>
+                <td>${cita.servicio_requerido}</td>
+                <td>${cita.nombre_barbero}</td>
+                <td>
+                    <form action="/admin/update/${cita.cita_id}" method="POST">
+                        <input type="number" name="valor_pagado" value="${cita.valor_pagado}">
+                        <button type="submit">Actualizar</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/admin/updateEstado/${cita.cita_id}" method="POST">
+                        <input type="hidden" name="cita_id" value="${cita.cita_id}">
+                        <select name="estado">
+                            <option value="Agendada" ${cita.estado === 'Agendada' ? 'selected' : ''}>Agendada</option>
+                            <option value="Cancelada" ${cita.estado === 'Cancelada' ? 'selected' : ''}>Cancelada</option>
+                            <option value="Pendiente" ${cita.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                        </select>
+                        <button type="submit">Actualizar</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="/admin/delete/${cita.cita_id}" method="POST">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </td>
+            `;
+            return row;
+        }
+
+        //borrar
+        const showAllForm = document.querySelector('.show-all-form');
+    if (showAllForm) {
+        showAllForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Inicio de la solicitud para mostrar todas las citas');
+            fetchWithAuth('/admin', { 
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(data => {
+    console.log('Respuesta recibida:', data);
+    if (data) { // Check if data exists
+        if (data.success && Array.isArray(data.citas)) {
+            console.log('Actualizando tabla con', data.citas.length, 'citas');
+            updateTable(data.citas);
+        } else {
+            console.error('Respuesta inesperada:', data);
+            if (data && data.message) {
+                alert('Error: ' + data.message);
+            } else {
+                alert('Error: Formato de respuesta inesperado');
+            }
+        }
+    } else {
+        console.error('No se recibieron datos');
+        alert('Error: No se recibieron datos de la solicitud');
+    }
+})
+            .catch(error => {
+                console.error('Error al procesar la solicitud:', error);
+                alert('Error al procesar la solicitud: ' + (error.message || 'Desconocido'));
+            });
+        });
+    } else {
+        console.error('Formulario .show-all-form no encontrado');
+    }
+        //borrar
+    document.querySelector('.show-all-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('Inicio de la solicitud para mostrar todas las citas');
+    console.log('Solicitando todas las citas');
+    fetchWithAuth('/admin', { 
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(data => {
+    console.log('Respuesta recibida:', data);
+    if (data.success && Array.isArray(data.citas)) {
+        updateTable(data.citas);
+    } else {
+        console.error('Respuesta inesperada:', data);
+        alert('Error: Formato de respuesta inesperado');
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Error al procesar la solicitud: ' + error.message);
+});
+});
+
+//funcion mostrar todas las citas
+
+        // Si la página se carga sin token en la URL, recargar con el token
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('token')) {
+            reloadPageWithAuth();
+        }
+    });
+</script>
+</html>

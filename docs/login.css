@@ -112,3 +112,78 @@ a.sign-up:hover {
 p{
   color: #ffffff;
 }
+
+/* Centrar el modal */
+.modal-content {
+  background-color: #fff;
+  margin: 0 auto; 
+  padding: 20px;
+  border: none;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+/* Fondo del modal */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 100; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.7); 
+  padding-top: 60px; 
+}
+
+/* Botón de cierre */
+.close {
+  color: #333;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Formulario de recuperación de contraseña */
+#forgotPasswordForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#forgotPasswordForm input[type="email"] {
+  padding: 10px;
+  width: 95%;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+#forgotPasswordForm button {
+  padding: 10px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#forgotPasswordForm button:hover {
+  background-color: #555;
+}
+
+/* Esconder el formulario de inicio de sesión mientras el modal está activo */
+body.modal-active #login-form {
+  display: none;
+}
